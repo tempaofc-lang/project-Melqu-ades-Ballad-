@@ -146,6 +146,9 @@
     const active = parts[0] === "read" ? "read" : section?.id || "home";
     const title = parts[0] === "read" ? (parts[1] ? `第${chapterNames[Number(parts[1]) - 1] || "?"}章` : "章节阅读") : section ? section.title : "公共档案";
     setDocumentMeta(title, active);
+    const isChronology = section?.id === "chronology" && parts.length <= 2;
+    if (isChronology && window.MIRROR_CHRONOLOGY.isMounted() && window.MIRROR_CHRONOLOGY.navigate(parts[1])) return;
+    window.MIRROR_CHRONOLOGY.destroy();
     if (!firstRender && !reducedMotion.matches) {
       wipe.classList.add("enter");
       await new Promise(resolve => setTimeout(resolve, 190));
@@ -154,6 +157,7 @@
     try {
       let html;
       if (!parts.length) html = home();
+      else if (isChronology) html = await window.MIRROR_CHRONOLOGY.page(parts[1]) || notFound();
       else if (parts[0] === "read" && !parts[1]) html = readerIndex();
       else if (parts[0] === "read" && parts.length === 2) html = await chapterPage(Number(parts[1]), token);
       else if (section && parts.length === 1) html = sectionPage(section);
@@ -163,6 +167,7 @@
       } else html = notFound();
       if (token !== renderToken || html === null) return;
       main.innerHTML = html;
+      if (isChronology) window.MIRROR_CHRONOLOGY.mount(parts[1]);
       window.scrollTo({ top: 0, behavior: "instant" });
       updateProgress();
     } catch (error) {

@@ -14,6 +14,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "梅尔基亚德斯的歌谣_主稿.md"
+CHRONOLOGY_SOURCE = ROOT / "设定集" / "联邦大事年纪.md"
 SITE = ROOT / "site"
 OUTPUT = ROOT / "dist"
 CHAPTER_HEADING = re.compile(r"^([一二三四五六七八九十]+)．$")
@@ -48,8 +49,40 @@ def chapters_from_manuscript(text: str) -> list[dict]:
     return chapters
 
 
+def chronology_from_markdown(text: str) -> list[dict]:
+    """Read year · summary blocks, with or without Markdown heading marks."""
+    records: list[dict] = []
+    current: dict | None = None
+    paragraph: list[str] = []
+    heading = re.compile(r"^(?:#{1,6}\s+)?(\d{4})\s*年?\s*[·•]\s*(.+)$")
+
+    def flush() -> None:
+        if current is not None and paragraph:
+            current["paragraphs"].append("\n".join(paragraph))
+        paragraph.clear()
+
+    for line in text.splitlines():
+        stripped = line.strip()
+        match = heading.fullmatch(stripped)
+        if match:
+            flush()
+            current = {"year": int(match.group(1)), "summary": match.group(2).strip(), "paragraphs": []}
+            records.append(current)
+        elif not stripped or re.fullmatch(r"-{3,}", stripped):
+            flush()
+        elif current is not None:
+            paragraph.append(stripped)
+    flush()
+    if not records or any(not record["paragraphs"] for record in records):
+        raise ValueError("Chronology needs nonempty year · summary records.")
+    if len({record["year"] for record in records}) != len(records):
+        raise ValueError("Chronology contains duplicate year headings.")
+    return sorted(records, key=lambda record: record["year"])
+
+
 def build() -> None:
     chapters = chapters_from_manuscript(SOURCE.read_text(encoding="utf-8-sig"))
+    chronology = chronology_from_markdown(CHRONOLOGY_SOURCE.read_text(encoding="utf-8-sig"))
     if OUTPUT.exists():
         shutil.rmtree(OUTPUT)
     shutil.copytree(SITE, OUTPUT)
@@ -77,7 +110,10 @@ def build() -> None:
         json.dumps({"chapters": manifest}, ensure_ascii=False, indent=2), encoding="utf-8"
     )
     (OUTPUT / ".nojekyll").touch()
-    print(f"Built {len(chapters)} chapters in {OUTPUT}")
+    (OUTPUT / "data" / "chronology.json").write_text(
+        json.dumps({"records": chronology}, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
+    print(f"Built {len(chapters)} chapters and {len(chronology)} year records in {OUTPUT}")
 
 
 if __name__ == "__main__":
