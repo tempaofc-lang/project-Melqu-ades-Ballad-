@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0a0e11">
+  <meta name="description" content="镜：广寒宫公共档案访问端。浏览人物、事件、纪年、技术、地点与组织记录。">
+  <title>镜 · 公共档案</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./styles.css">
+  <script defer src="./content.js"></script>
+  <script defer src="./app.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">跳至正文</a>
+  <div class="site-shell">
+    <aside class="sidebar" id="sidebar" aria-label="档案栏目">
+      <a class="brand" href="#/" aria-label="镜，返回首页">
+        <span class="brand-mark" aria-hidden="true"><span></span></span>
+        <span><strong>镜</strong><small>MIRROR / ARCHIVE</small></span>
+      </a>
+      <div class="sidebar-rule"></div>
+      <p class="nav-caption">PUBLIC ACCESS / 公共入口</p>
+      <nav id="primary-nav" aria-label="主要栏目"></nav>
+      <div class="sidebar-bottom">
+        <span class="signal" aria-hidden="true"></span>
+        <p>广寒宫本地节点<br><span>档案接入正常 · 版本核查进行中</span></p>
+        <small>GA-2087 / PUBLIC INTERFACE</small>
+      </div>
+    </aside>
+    <div class="main-shell">
+      <header class="topbar">
+        <button class="menu-button" id="menu-button" type="button" aria-label="打开栏目菜单" aria-expanded="false" aria-controls="sidebar"><span></span><span></span></button>
+        <div class="crumb" id="crumb">镜 / 公共档案</div>
+        <div class="topbar-right"><span class="topbar-edition">本地接收版本</span><span class="topbar-dot"></span><span>2087</span></div>
+      </header>
+      <main id="main" tabindex="-1" aria-live="polite"></main>
+      <footer class="footer"><span>镜 · 广寒宫公共档案访问端</span><span>当记录存在差异，保留各自来源与接收时间。</span></footer>
+    </div>
+  </div>
+  <div class="screen-wipe" id="screen-wipe" aria-hidden="true"></div>
+</body>
+</html>
