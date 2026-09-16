@@ -61,6 +61,15 @@ try:
             expect(page.locator("h1")).to_have_text("未找到这项记录")
             assert not errors, errors
 
+            # A deployment can change data while this tab remains open.
+            updated = json.loads(json.dumps({"records": records}))
+            updated["records"][2]["summary"] = "修订后的年度简概"
+            page.route("**/data/chronology.json", lambda route: route.fulfill(json=updated))
+            page.goto(url + "#/news")
+            expect(page.locator(".records-grid")).to_be_visible()
+            page.goto(url + "#/chronology")
+            expect(page.locator("#selected-summary")).to_have_text("修订后的年度简概")
+
             mobile = browser.new_page(viewport={"width": 390, "height": 844}, is_mobile=True, has_touch=True, reduced_motion="reduce")
             mobile.on("pageerror", lambda error: errors.append(str(error)))
             mobile.goto(url + "#/chronology")

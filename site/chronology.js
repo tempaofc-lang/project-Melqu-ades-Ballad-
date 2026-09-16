@@ -11,14 +11,17 @@
   const indexOf = year => records.findIndex(record => String(record.year) === String(year));
 
   async function load() {
-    if (!pending) pending = fetch("./data/chronology.json").then(response => {
+    // Share only requests in flight; revisiting the archive must revalidate data.
+    if (!pending) pending = fetch("./data/chronology.json", { cache: "no-cache" }).then(response => {
       if (!response.ok) throw new Error("纪年资料暂时不可用");
       return response.json();
     }).then(data => {
       if (!Array.isArray(data.records) || !data.records.length) throw new Error("纪年资料为空");
+      const selectedYear = records[selected]?.year;
       records = data.records;
-      selected = Math.min(selected, records.length - 1);
-    }).catch(error => { pending = null; throw error; });
+      const preserved = indexOf(selectedYear);
+      selected = preserved >= 0 ? preserved : Math.min(selected, records.length - 1);
+    }).finally(() => { pending = null; });
     await pending;
   }
 
