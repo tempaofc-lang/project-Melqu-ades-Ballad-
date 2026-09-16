@@ -66,10 +66,12 @@ try:
             mobile.goto(url + "#/chronology")
             mobile.locator("#year-jump").select_option("5")
             expect(mobile.locator("#selected-year")).to_have_text(str(records[5]["year"]))
+            expect(mobile.locator("#sidebar")).to_have_css("box-shadow", "none")
             assert mobile.evaluate("document.documentElement.scrollWidth <= innerWidth"), "Mobile page overflows horizontally"
             mobile.screenshot(path=str(ARTIFACTS / "chronology-mobile.png"), full_page=True)
             mobile.locator("#open-year").tap()
             expect(mobile.locator("#chronicle-dialog")).to_be_visible()
+            mobile.wait_for_timeout(350)  # Let the browser's native tap highlight clear.
             mobile.screenshot(path=str(ARTIFACTS / "chronology-mobile-reading.png"))
             mobile.locator("#close-year").tap()
             expect(mobile.locator("#chronicle-dialog")).not_to_be_visible()
