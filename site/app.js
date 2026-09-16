@@ -48,11 +48,12 @@
   }
 
   function updateNav(active) {
+    const navLabel = (zh, en) => `<span class="nav-label"><span>${esc(zh)}</span><small lang="en">${esc(en)}</small></span>`;
     nav.innerHTML = `
-      <a href="#/" class="nav-link ${active === "home" ? "active" : ""}" ${active === "home" ? 'aria-current="page"' : ""}><span class="nav-index">00</span><span>总览</span><span class="nav-arrow">↗</span></a>
-      <a href="#/read" class="nav-link ${active === "read" ? "active" : ""}" ${active === "read" ? 'aria-current="page"' : ""}><span class="nav-index">↳</span><span>章节阅读</span><span class="nav-arrow">↗</span></a>
+      <a href="#/" class="nav-link ${active === "home" ? "active" : ""}" ${active === "home" ? 'aria-current="page"' : ""}><span class="nav-index">00</span>${navLabel("总览", "OVERVIEW")}<span class="nav-arrow" aria-hidden="true">↗</span></a>
+      <a href="#/read" class="nav-link ${active === "read" ? "active" : ""}" ${active === "read" ? 'aria-current="page"' : ""}><span class="nav-index">↳</span>${navLabel("章节阅读", "CHAPTERS")}<span class="nav-arrow" aria-hidden="true">↗</span></a>
       <span class="nav-divider"></span>
-      ${catalogue.sections.map(section => `<a href="#/${esc(section.id)}" class="nav-link ${active === section.id ? "active" : ""}" ${active === section.id ? 'aria-current="page"' : ""}><span class="nav-index">${esc(section.number)}</span><span>${esc(section.title)}</span><span class="nav-arrow">↗</span></a>`).join("")}
+      ${catalogue.sections.map(section => `<a href="#/${esc(section.id)}" class="nav-link ${active === section.id ? "active" : ""}" ${active === section.id ? 'aria-current="page"' : ""}><span class="nav-index">${esc(section.number)}</span>${navLabel(section.title, section.en)}<span class="nav-arrow" aria-hidden="true">↗</span></a>`).join("")}
     `;
   }
 
