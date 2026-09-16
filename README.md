@@ -6,7 +6,7 @@
 
 - `site/`：页面、样式、路由和各栏目的公众文案。
 - `site/content.js`：侧栏栏目与档案卡片的数据入口。为 `sections` 增加栏目、在 `entries` 添加同名数组即可出现列表与详情页；「关于我们」有单独版式。
-- `site/content.js` 中各条目的 `media.src`：可填 `assets/文件名`，图像将占用预留的影像槽位。请将文件放入 `site/assets/`；不填则显示占位图。
+- `site/content.js` 中各条目默认只有文字，没有图片或图片占位。明确需要配图时增加 `media: { src: "assets/文件名", alt: "图像说明" }`，并将文件放入 `site/assets/`；若已规划图片但尚未制作，可只提供 `media: { alt: "图像说明" }` 以显示占位。纪年、新闻、技术三个栏目设置了 `mediaEnabled: false`，不会显示图片；如未来需要配图，须先调整栏目配置。
 - `scripts/build_site.py`：从根目录主稿 Markdown 抽取三十章，生成 `dist/data/chapters/*.json` 与目录，并复制 `封面.png`。章节正文取自主稿，资料页介绍文案为独立撰写。
 - `.github/workflows/pages.yml`：主分支相关文件更新时自动构建并发布；拉取请求只构建检查；也可手动运行。
 
