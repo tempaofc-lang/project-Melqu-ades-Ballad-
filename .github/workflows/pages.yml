@@ -1,0 +1,74 @@
+name: Publish Mirror archive
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'site/**'
+      - 'scripts/build_site.py'
+      - '梅尔基亚德斯的歌谣_主稿.md'
+      - '封面.png'
+      - '.github/workflows/pages.yml'
+  pull_request:
+    paths:
+      - 'site/**'
+      - 'scripts/build_site.py'
+      - '梅尔基亚德斯的歌谣_主稿.md'
+      - '封面.png'
+      - '.github/workflows/pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Build archive
+        run: python scripts/build_site.py
+      - name: Check chapter output
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('dist')
+          manifest = json.loads((root / 'data/manifest.json').read_text(encoding='utf-8'))
+          assert len(manifest['chapters']) == 30
+          assert all((root / item['file']).is_file() for item in manifest['chapters'])
+          assert (root / 'assets/cover.png').is_file()
+          PY
+      - name: Configure Pages
+        if: github.event_name != 'pull_request'
+        uses: actions/configure-pages@v5
+      - name: Upload site artifact
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: dist
+
+  deploy:
+    if: github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
