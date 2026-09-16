@@ -37,18 +37,22 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid 
 .brand-mark span { width: 6px; height: 6px; border-radius: 50%; background: var(--text); z-index: 1; }
 .sidebar-rule { height: 1px; margin: 0 25px; background: var(--line); }
 .nav-caption { margin: 29px 26px 14px; color: #6e7e87; font: 9px var(--mono); letter-spacing: .13em; }
-#primary-nav { padding: 0 13px; display: flex; flex-direction: column; gap: 2px; }
-.nav-link { display: grid; grid-template-columns: 30px 1fr 16px; align-items: center; padding: 11px 13px; color: #a4b0b6; font-size: 13px; transition: background .18s, color .18s; border-left: 2px solid transparent; }
+#primary-nav { padding: 0 13px 8px; display: flex; flex-direction: column; gap: 2px; min-height: 0; overflow-y: auto; }
+.nav-link { display: grid; grid-template-columns: 30px 1fr 16px; align-items: center; flex: none; padding: 8px 13px; color: #a4b0b6; font-size: 13px; transition: background .18s, color .18s; border-left: 2px solid transparent; }
 .nav-link:hover, .nav-link.active { color: var(--text); background: #1a2528; }
 .nav-link.active { border-color: var(--accent); }
 .nav-index { font: 10px var(--mono); color: #6d8088; }
 .nav-link.active .nav-index { color: var(--accent); }
+.nav-label { display: flex; flex-direction: column; gap: 3px; line-height: 1.2; }
+.nav-label small { color: #73858d; font: 9px var(--mono); letter-spacing: .07em; }
+.nav-link.active .nav-label small { color: #a2b9b9; }
 .nav-arrow { color: #5d777c; font-size: 13px; opacity: 0; transition: opacity .18s; }
 .nav-link:hover .nav-arrow, .nav-link.active .nav-arrow { opacity: 1; }
-.nav-divider { height: 1px; background: var(--line); margin: 14px 13px; }
-.sidebar-bottom { margin: auto 25px 27px; border-top: 1px solid var(--line); padding-top: 25px; position: relative; }
-.sidebar-bottom p { margin: 0 0 24px 14px; font-size: 12px; line-height: 1.7; }
+.nav-divider { height: 1px; flex: none; background: var(--line); margin: 10px 13px; }
+.sidebar-bottom { margin: auto 25px 24px; border-top: 1px solid var(--line); padding-top: 19px; position: relative; flex: none; }
+.sidebar-bottom p { margin: 0 0 16px 14px; font-size: 12px; line-height: 1.65; }
 .sidebar-bottom p span { color: var(--muted); font-size: 10px; }
+.sidebar-bottom p span[lang="en"] { font: 8px var(--mono); letter-spacing: .02em; }
 .sidebar-bottom small { color: #5f7079; font: 9px var(--mono); letter-spacing: .08em; }
 .signal { position: absolute; top: 32px; left: 0; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 10px #4dd0c177; }
 .main-shell { min-width: 0; display: flex; flex-direction: column; }
