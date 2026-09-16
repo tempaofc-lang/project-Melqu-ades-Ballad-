@@ -22,6 +22,6 @@ python -m http.server 8000
 
 ## 发布设置
 
-仓库管理员须在 **Settings → Pages → Build and deployment → Source** 选择 **GitHub Actions**。之后工作流将从 `main` 自动发布 `dist/`。工作流成功时的地址通常是 `https://tempaofc-lang.github.io/project-Melqu-ades-Ballad-/`，以 Pages 页面给出的实际地址为准。
+仓库管理员须在 **Settings → Pages → Build and deployment → Source** 选择 **GitHub Actions**。首次启用后，在 **Actions → Publish Mirror archive** 重新运行工作流；此后主稿与站点文件更新时会从 `main` 自动发布 `dist/`。工作流成功时的地址通常是 `https://tempaofc-lang.github.io/project-Melqu-ades-Ballad-/`，以 Pages 页面给出的实际地址为准。
 
 视觉资产制作规则见 `视觉企划/00_视觉总纲.md` 与 `视觉企划/01_视觉策划书.md`。
