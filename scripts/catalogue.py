@@ -128,7 +128,7 @@ def entry_from_markdown(text: str, stem: str, section: dict, site: Path) -> dict
     facts = []
     cleaned = []
     in_facts = False
-    for line in ([] if section.get("format") == "three-sections" else body.splitlines()):
+    for line in ([] if section.get("format") == "three-subtitles" else body.splitlines()):
         if re.fullmatch(r"##\s+档案字段\s*", line):
             in_facts = True
             continue
@@ -144,16 +144,18 @@ def entry_from_markdown(text: str, stem: str, section: dict, site: Path) -> dict
                 facts.append(item[1])
         else:
             cleaned.append(line)
-    if section.get("format") == "three-sections":
+    if section.get("format") == "three-subtitles":
         if not re.match(r"^#\s+\S", body.strip()):
             raise ValueError("杂项请以 # 大标题 开始")
         # Heading names are ordinary text, including 正文 and 档案字段.
         doc = document(body)
-        headings = [i for i, block in enumerate(doc["blocks"]) if block["type"] == "heading"]
-        if len(headings) != 3 or any(doc["blocks"][i]["level"] != 2 for i in headings):
-            raise ValueError("杂项需要三个 ## 小标题，标题名称可自由填写")
-        if headings[0] != 0 or any(end == start + 1 for start, end in zip(headings, headings[1:] + [len(doc["blocks"])])):
-            raise ValueError("杂项每个小标题下须有非空正文，大标题后直接填写第一个小标题")
+        blocks = doc["blocks"]
+        if len(blocks) < 4 or any(block["type"] != "heading" or block["level"] != 2 for block in blocks[:3]):
+            raise ValueError("杂项需要连续三个 ## 小标题，然后填写统一正文")
+        if blocks[3]["type"] == "heading":
+            raise ValueError("三个小标题后须直接填写非空正文")
+        doc["subtitles"] = [block["text"] for block in blocks[:3]]
+        doc["blocks"] = blocks[3:]
     else:
         doc = document("\n".join(cleaned), meta.get("title", ""))
     identifier = meta.get("id") or stem.lower()
@@ -164,6 +166,8 @@ def entry_from_markdown(text: str, stem: str, section: dict, site: Path) -> dict
     entry = {"id": identifier, "title": doc["title"], "summary": meta.get("summary") or plain[:100] + ("…" if len(plain) > 100 else ""),
              "kicker": meta.get("kicker") or section["title"] + " · 公开档案", "status": meta.get("status") or "已收录",
              "facts": facts, "blocks": doc["blocks"]}
+    if "subtitles" in doc:
+        entry["subtitles"] = doc["subtitles"]
     image = meta.get("image")
     placeholder = meta.get("image_placeholder", False)
     if image or placeholder:

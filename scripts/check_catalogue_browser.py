@@ -41,7 +41,7 @@ try:
             page.locator("#record-filter").fill("")
             page.locator(".record-card").first.click()
             expect(page.locator("h1")).to_have_text(entries[0]["title"])
-            expect(page.locator(".detail-copy")).to_be_visible()
+            expect(page.locator(".misc-body" if section.get("format") == "three-subtitles" else ".detail-copy")).to_be_visible()
 
         for width, height, label in ((1440, 1000, "desktop"), (390, 844, "mobile")):
             page.set_viewport_size({"width": width, "height": height})
@@ -52,10 +52,8 @@ try:
             assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 1")
             page.screenshot(path=str(ARTIFACTS / f"about-{label}.png"), full_page=True)
 
-        # Exercise the new empty category and a future authored three-section record.
-        misc = {"id": "miscellaneous_001", "title": "补充记录", "summary": "公众说明", "kicker": "杂项", "status": "已收录", "facts": [], "blocks": []}
-        for title in ("正文", "档案字段", "自由小标题"):
-            misc["blocks"].extend([{"type": "heading", "level": 2, "text": title}, {"type": "paragraph", "text": title + "的正文。"}])
+        # Three adjacent subtitles precede a single continuous body.
+        misc = {"id": "miscellaneous_001", "title": "补充记录", "summary": "公众说明", "kicker": "杂项", "status": "已收录", "facts": [], "subtitles": ["正文", "档案字段", "自由小标题"], "blocks": [{"type": "paragraph", "text": "统一正文，不分三节。"}]}
         preview = copy.deepcopy(data)
         preview["entries"]["miscellaneous"] = [misc]
         page.route("**/data/catalogue.json", lambda route: route.fulfill(json=preview))
@@ -64,7 +62,14 @@ try:
         expect(page.locator('#primary-nav a[href="#/miscellaneous"] .nav-index')).to_have_text("08")
         expect(page.locator('#primary-nav a[href="#/about"] .nav-index')).to_have_text("09")
         page.locator(".record-card").click()
-        expect(page.locator(".detail-copy h2")).to_have_text(["正文", "档案字段", "自由小标题"])
+        expect(page.locator(".misc-subtitles span")).to_have_text(["正文", "档案字段", "自由小标题"])
+        expect(page.locator(".misc-body")).to_have_text("统一正文，不分三节。")
+        for width, height, label in ((1440, 1000, "desktop"), (390, 844, "mobile")):
+            page.set_viewport_size({"width": width, "height": height})
+            tops = page.locator(".misc-subtitles span").evaluate_all("els => els.map(el => el.getBoundingClientRect().top)")
+            assert max(tops) - min(tops) < 1
+            assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 1")
+            page.screenshot(path=str(ARTIFACTS / f"misc-{label}.png"), full_page=True)
         expect(page.locator(".detail-aside, #main .media-frame")).to_have_count(0)
         assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 1")
         page.unroute("**/data/catalogue.json")

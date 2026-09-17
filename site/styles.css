@@ -332,3 +332,11 @@ main { width: min(100%, 1460px); margin: 0 auto; flex: 1; padding: 0 clamp(24px,
 .chapter-jump .chapter-grid { margin-top: 20px; }
 .chapter-jump .chapter-link { min-width: 0; }
 .chapter-jump .chapter-link > span:nth-child(2) { overflow-wrap: anywhere; }
+
+/* Miscellaneous: one title, three adjacent subtitles, one continuous body. */
+.misc-document { max-width: 850px; margin-inline: auto; }
+.misc-header { margin: 38px 0 32px; }
+.misc-header h1 { margin: 18px 0 24px; font-family: var(--serif); font-size: clamp(30px, 4vw, 46px); font-weight: 500; line-height: 1.5; overflow-wrap: anywhere; }
+.misc-subtitles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; padding-block: 18px; border-block: 1px solid var(--line); font-size: 14px; line-height: 1.8; }
+.misc-subtitles span { min-width: 0; overflow-wrap: anywhere; }
+@media (max-width: 600px) { .misc-subtitles { gap: 10px; font-size: 13px; } }

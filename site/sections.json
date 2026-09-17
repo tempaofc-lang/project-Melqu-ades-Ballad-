@@ -72,7 +72,7 @@
     "sourceDir": "设定集/杂项",
     "prefix": "Miscellaneous",
     "minNumberDigits": 3,
-    "format": "three-sections",
+    "format": "three-subtitles",
     "mediaEnabled": false
   },
   {
