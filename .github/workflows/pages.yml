@@ -7,7 +7,7 @@ on:
       - 'site/**'
       - 'scripts/**'
       - '设定集/**'
-      - '梅尔基亚德斯的歌谣_主稿.md'
+      - '各章节/**'
       - '封面.png'
       - '.github/workflows/pages.yml'
   pull_request:
@@ -15,7 +15,7 @@ on:
       - 'site/**'
       - 'scripts/**'
       - '设定集/**'
-      - '梅尔基亚德斯的歌谣_主稿.md'
+      - '各章节/**'
       - '封面.png'
       - '.github/workflows/pages.yml'
   workflow_dispatch:
@@ -50,6 +50,8 @@ jobs:
         run: python scripts/check_chronology_browser.py
       - name: Check catalogue and About pages
         run: python scripts/check_catalogue_browser.py
+      - name: Check chapter reading and updates
+        run: python scripts/check_chapters_browser.py
       - name: Save interface screenshots
         if: always()
         uses: actions/upload-artifact@v4
@@ -64,7 +66,9 @@ jobs:
           from pathlib import Path
           root = Path('dist')
           manifest = json.loads((root / 'data/manifest.json').read_text(encoding='utf-8'))
-          assert len(manifest['chapters']) == 30
+          assert manifest['chapters']
+          numbers = [item['number'] for item in manifest['chapters']]
+          assert numbers == sorted(set(numbers))
           assert all((root / item['file']).is_file() for item in manifest['chapters'])
           assert (root / 'assets/cover.png').is_file()
           records = json.loads((root / 'data/chronology.json').read_text(encoding='utf-8'))['records']

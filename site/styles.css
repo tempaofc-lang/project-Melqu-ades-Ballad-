@@ -327,3 +327,8 @@ main { width: min(100%, 1460px); margin: 0 auto; flex: 1; padding: 0 clamp(24px,
   .document-table th, .document-table td { padding: 12px; }
   .markdown-body h2 { font-size: 19px; }
 }
+
+.chapter-jump { padding: 24px 0; border-top: 1px solid var(--line); }
+.chapter-jump .chapter-grid { margin-top: 20px; }
+.chapter-jump .chapter-link { min-width: 0; }
+.chapter-jump .chapter-link > span:nth-child(2) { overflow-wrap: anywhere; }

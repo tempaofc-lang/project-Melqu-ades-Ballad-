@@ -8,13 +8,7 @@
   const menu = document.querySelector("#menu-button");
   const sidebar = document.querySelector("#sidebar");
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-  const chapterNames = ["一", "二", "三", "四", "五", "六", "七", "八", "九", "十", "十一", "十二", "十三", "十四", "十五", "十六", "十七", "十八", "十九", "二十", "二十一", "二十二", "二十三", "二十四", "二十五", "二十六", "二十七", "二十八", "二十九", "三十"];
-  const chapterGroups = [
-    { name: "地面初报", range: [1, 13], note: "从第一批病例到耶路撒冷" },
-    { name: "后续记录", range: [14, 22], note: "地面社会与一条远距离链路" },
-    { name: "月背接收", range: [23, 30], note: "第谷与广寒宫的并行时间" },
-  ];
-  let manifestPromise;
+  let chapters = [];
   let renderToken = 0;
   let firstRender = true;
 
@@ -31,14 +25,10 @@
     return catalogue.sections.find(section => section.id === id);
   }
 
-  function chapterManifest() {
-    if (!manifestPromise) {
-      manifestPromise = fetch("./data/manifest.json").then(response => {
-        if (!response.ok) throw new Error("目录暂时不可用");
-        return response.json();
-      });
-    }
-    return manifestPromise;
+  async function chapterManifest() {
+    const response = await fetch("./data/manifest.json", { cache: "no-cache" });
+    if (!response.ok) throw new Error("目录暂时不可用");
+    return response.json();
   }
 
   function closeMenu() {
@@ -69,41 +59,35 @@
     return `<div class="page-heading"><div class="eyebrow"><span class="eyebrow-line"></span>${esc(eyebrow)}</div><h1>${esc(title)}</h1><p>${esc(subtitle)}</p></div>`;
   }
 
-  function chapterLinks(start, end) {
-    return Array.from({ length: end - start + 1 }, (_, index) => {
-      const number = start + index;
-      return `<a href="#/read/${number}" class="chapter-link" aria-label="阅读第${chapterNames[number - 1]}章"><span class="chapter-no">${String(number).padStart(2, "0")}</span><span>第${chapterNames[number - 1]}章</span><span class="chapter-link-arrow" aria-hidden="true">↗</span></a>`;
-    }).join("");
-  }
-
-  function chapterPanels() {
-    return chapterGroups.map(group => `<section class="chapter-group"><div class="chapter-group-heading"><div><small>SECTION / ${String(group.range[0]).padStart(2, "0")}—${String(group.range[1]).padStart(2, "0")}</small><h3>${esc(group.name)}</h3></div><span>${esc(group.note)}</span></div><div class="chapter-grid">${chapterLinks(...group.range)}</div></section>`).join("");
+  function chapterLinks(records) {
+    return records.map(record => `<a href="#/read/${record.number}" class="chapter-link" aria-label="阅读${esc(record.label)}"><span class="chapter-no">${String(record.number).padStart(3, "0")}</span><span>${esc(record.label)}</span><span class="chapter-link-arrow" aria-hidden="true">↗</span></a>`).join("");
   }
 
   function home() {
     return `<section class="home-intro"><div class="eyebrow"><span class="eyebrow-line"></span>GUANGHAN / PUBLIC ARCHIVE 2087</div><div class="home-intro-line"><h1>人类的记录，<br><em>仍在这里。</em></h1><p>欢迎访问镜的广寒宫本地节点。我们保存收到的资料，也标明它们在何时、何处出现分歧。这里提供查阅路径，判断留给每位读者。</p></div><div class="system-strip"><span><i class="pulse"></i> 本地档案可用</span><span>资料版本 / 并行接收</span><span>公众访问 / 开放</span></div></section>
-    <section class="feature-panel" aria-labelledby="feature-title"><div class="feature-cover"><span class="frame-index">CULTURAL RECORD / 001</span><img src="./assets/cover.png" alt="《梅尔基亚德斯的歌谣》封面" fetchpriority="high"><span class="cover-bottom">已归档封面 · 原始图像</span></div><div class="feature-content"><div class="feature-topline"><span class="tag">文化文献</span><span>30 CHAPTERS / TEXT</span></div><h2 id="feature-title">梅尔基亚德斯<br>的歌谣</h2><p class="feature-lead">一部关于记忆、公共生活与记录责任的长篇作品。镜保留其当前接收版本，供公众从任意章节开始阅读。</p><div class="feature-meta"><span>载体<br><strong>文字 / 原稿</strong></span><span>目录<br><strong>三十章</strong></span><span>状态<br><strong>持续更新</strong></span></div><a class="primary-action" href="#/read/1">从第一章开始 <span aria-hidden="true">↗</span></a><div class="feature-chapters"><div class="section-mini-title"><span>章节入口</span><a href="#/read">浏览全部 <span aria-hidden="true">↗</span></a></div><div class="feature-chapter-list">${chapterLinks(1, 6)}</div></div></div></section>
+    <section class="feature-panel" aria-labelledby="feature-title"><div class="feature-cover"><span class="frame-index">CULTURAL RECORD / 001</span><img src="./assets/cover.png" alt="《梅尔基亚德斯的歌谣》封面" fetchpriority="high"><span class="cover-bottom">已归档封面 · 原始图像</span></div><div class="feature-content"><div class="feature-topline"><span class="tag">文化文献</span><span>${chapters.length} CHAPTERS / TEXT</span></div><h2 id="feature-title">梅尔基亚德斯<br>的歌谣</h2><p class="feature-lead">一部关于记忆、公共生活与记录责任的长篇作品。镜保留其当前接收版本，供公众从任意章节开始阅读。</p><div class="feature-meta"><span>载体<br><strong>文字 / 原稿</strong></span><span>目录<br><strong>${chapters.length} 章</strong></span><span>状态<br><strong>持续更新</strong></span></div><a class="primary-action" href="#/read/${chapters[0].number}">从首章开始 <span aria-hidden="true">↗</span></a><div class="feature-chapters"><div class="section-mini-title"><span>章节入口</span><a href="#/read">浏览全部 <span aria-hidden="true">↗</span></a></div><div class="feature-chapter-list">${chapterLinks(chapters.slice(0, 6))}</div></div></div></section>
     <section class="home-catalogue"><div class="section-bar"><div><span class="eyebrow">INDEX / PUBLIC RECORDS</span><h2>浏览公共档案</h2></div><p>按对象进入，沿关联记录继续检索。</p></div><div class="section-card-grid">${catalogue.sections.map(section => `<a class="section-card" href="#/${esc(section.id)}"><span>${esc(section.number)} / ${esc(section.en)}</span><h3>${esc(section.title)}</h3><p>${esc(section.intro)}</p><b aria-hidden="true">↗</b></a>`).join("")}</div></section>`;
   }
 
   function readerIndex() {
-    return `${heading("COLLECTION / LITERARY RECORD", "章节阅读", "《梅尔基亚德斯的歌谣》当前接收版本。章节顺序依原稿排列，时间顺序可在纪年栏目交叉查阅。")}
-      <div class="note-banner"><span>文献说明</span><p>阅读页呈现原稿正文。文献仍在更新；档案条目的介绍文字由镜公共端独立编写。</p></div>
-      <div class="all-chapters">${chapterPanels()}</div>`;
+    return `${heading("COLLECTION / LITERARY RECORD", "章节阅读", "《梅尔基亚德斯的歌谣》当前接收版本。选择章节，直接进入正文。")}
+      <nav class="chapter-jump" aria-label="全部章节快速跳转"><div class="section-mini-title"><span>全部章节</span><span>${chapters.length} CHAPTERS</span></div><div class="chapter-grid">${chapterLinks(chapters)}</div></nav>`;
   }
 
   async function chapterPage(number, token) {
-    if (!Number.isInteger(number) || number < 1 || number > 30) return notFound();
-    const manifest = await chapterManifest();
-    const record = manifest.chapters.find(item => item.number === number);
+    if (!Number.isSafeInteger(number) || number < 1) return notFound();
+    const index = chapters.findIndex(item => item.number === number);
+    const record = chapters[index];
+    const previous = chapters[index - 1];
+    const next = chapters[index + 1];
     if (!record) return notFound();
-    const response = await fetch(`./${record.file}`);
+    const response = await fetch(`./${record.file}`, { cache: "no-cache" });
     if (!response.ok) throw new Error("章节暂时无法读取");
     const chapter = await response.json();
     if (token !== renderToken) return null;
     const fontSize = Number(localStorage.getItem("mirror-reader-size") || 0);
     const paragraphs = chapter.paragraphs.map(item => item.kind === "scene" ? `<h2 class="scene-heading">${esc(item.text)}</h2>` : `<p>${esc(item.text)}</p>`).join("");
-    return `<article class="reader-page"><div class="reader-bar"><a href="#/read" class="text-link">← 全部章节</a><span>镜 / 文献阅读</span><div class="reader-tools"><button type="button" data-reader-size="-1" aria-label="缩小正文字号">A−</button><button type="button" data-reader-size="1" aria-label="放大正文字号">A＋</button></div></div><div class="reading-progress"><span id="reading-progress"></span></div><header class="reader-header"><div class="eyebrow"><span class="eyebrow-line"></span>ARCHIVED TEXT / ${String(number).padStart(2, "0")}</div><h1>第${chapterNames[number - 1]}章<span>．</span></h1><p>梅尔基亚德斯的歌谣 · 当前接收版本</p></header><div class="reader-copy" style="--reader-step:${Math.max(-2, Math.min(3, fontSize))}">${paragraphs}</div><nav class="reader-end" aria-label="章节导航">${number > 1 ? `<a href="#/read/${number - 1}"><small>上一章</small><span>第${chapterNames[number - 2]}章 ←</span></a>` : `<span></span>`}${number < 30 ? `<a href="#/read/${number + 1}"><small>下一章</small><span>第${chapterNames[number]}章 →</span></a>` : `<a href="#/read"><small>返回</small><span>章节目录 →</span></a>`}</nav></article>`;
+    return `<article class="reader-page"><div class="reader-bar"><a href="#/read" class="text-link">← 全部章节</a><span>镜 / 文献阅读</span><div class="reader-tools"><button type="button" data-reader-size="-1" aria-label="缩小正文字号">A−</button><button type="button" data-reader-size="1" aria-label="放大正文字号">A＋</button></div></div><div class="reading-progress"><span id="reading-progress"></span></div><header class="reader-header"><div class="eyebrow"><span class="eyebrow-line"></span>ARCHIVED TEXT / ${String(number).padStart(3, "0")}</div><h1>${esc(record.label)}</h1><p>梅尔基亚德斯的歌谣 · 当前接收版本</p></header><div class="reader-copy" style="--reader-step:${Math.max(-2, Math.min(3, fontSize))}">${paragraphs}</div><nav class="reader-end" aria-label="章节导航">${previous ? `<a href="#/read/${previous.number}"><small>上一章</small><span>${esc(previous.label)} ←</span></a>` : `<span></span>`}${next ? `<a href="#/read/${next.number}"><small>下一章</small><span>${esc(next.label)} →</span></a>` : `<a href="#/read"><small>返回</small><span>章节目录 →</span></a>`}</nav></article>`;
   }
 
   function card(section, entry) {
@@ -144,7 +128,7 @@
     const parts = routeParts();
     const section = sectionById(parts[0]);
     const active = parts[0] === "read" ? "read" : section?.id || "home";
-    const title = parts[0] === "read" ? (parts[1] ? `第${chapterNames[Number(parts[1]) - 1] || "?"}章` : "章节阅读") : section ? section.title : "公共档案";
+    const title = parts[0] === "read" ? (parts[1] ? `第${Number(parts[1]) || "?"}章` : "章节阅读") : section ? section.title : "公共档案";
     setDocumentMeta(title, active);
     const isChronology = section?.id === "chronology" && parts.length <= 2;
     if (isChronology && window.MIRROR_CHRONOLOGY.isMounted() && window.MIRROR_CHRONOLOGY.navigate(parts[1])) return;
@@ -156,6 +140,13 @@
     if (token !== renderToken) return;
     try {
       let html;
+      if (!parts.length || parts[0] === "read") {
+        const manifest = await chapterManifest();
+        if (token !== renderToken) return;
+        chapters = manifest.chapters;
+        const record = chapters.find(item => item.number === Number(parts[1]));
+        if (parts[0] === "read" && record) setDocumentMeta(record.label, "read");
+      }
       if (section && (section.sourceDir || section.id === "about")) {
         const response = await fetch("./data/catalogue.json", { cache: "no-cache" });
         if (!response.ok) throw new Error("栏目资料暂时不可用");

@@ -12,44 +12,14 @@ import shutil
 from pathlib import Path
 
 from catalogue import catalogue_from_folders
+from chapters import chapters_from_folder
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SOURCE = ROOT / "梅尔基亚德斯的歌谣_主稿.md"
+CHAPTER_SOURCE = ROOT / "各章节"
 CHRONOLOGY_SOURCE = ROOT / "设定集" / "联邦大事年纪.md"
 SITE = ROOT / "site"
 OUTPUT = ROOT / "dist"
-CHAPTER_HEADING = re.compile(r"^([一二三四五六七八九十]+)．$")
-NUMERALS = [
-    "一", "二", "三", "四", "五", "六", "七", "八", "九", "十",
-    "十一", "十二", "十三", "十四", "十五", "十六", "十七", "十八", "十九", "二十",
-    "二十一", "二十二", "二十三", "二十四", "二十五", "二十六", "二十七", "二十八", "二十九", "三十",
-]
-
-
-def chapters_from_manuscript(text: str) -> list[dict]:
-    chapters: list[dict] = []
-    current: dict | None = None
-
-    for line in text.splitlines():
-        stripped = line.strip()
-        match = CHAPTER_HEADING.fullmatch(stripped)
-        if match:
-            expected = NUMERALS[len(chapters)] if len(chapters) < len(NUMERALS) else None
-            if match.group(1) != expected:
-                raise ValueError(f"Unexpected chapter heading: {stripped}; expected {expected}．")
-            current = {"number": len(chapters) + 1, "label": stripped, "paragraphs": []}
-            chapters.append(current)
-        elif current and stripped:
-            current["paragraphs"].append({
-                "kind": "scene" if stripped.startswith("【") and stripped.endswith("】") else "text",
-                "text": stripped,
-            })
-
-    if len(chapters) != 30 or any(not chapter["paragraphs"] for chapter in chapters):
-        raise ValueError("The manuscript must contain 30 nonempty chapters in order.")
-    return chapters
-
 
 def chronology_from_markdown(text: str) -> list[dict]:
     """Read year · summary blocks, with or without Markdown heading marks."""
@@ -83,7 +53,7 @@ def chronology_from_markdown(text: str) -> list[dict]:
 
 
 def build() -> None:
-    chapters = chapters_from_manuscript(SOURCE.read_text(encoding="utf-8-sig"))
+    chapters = chapters_from_folder(CHAPTER_SOURCE)
     chronology = chronology_from_markdown(CHRONOLOGY_SOURCE.read_text(encoding="utf-8-sig"))
     sections = json.loads((SITE / "sections.json").read_text(encoding="utf-8"))
     catalogue = catalogue_from_folders(ROOT, sections)
@@ -102,7 +72,7 @@ def build() -> None:
     manifest = []
     for chapter in chapters:
         number = chapter["number"]
-        filename = f"{number:02d}.json"
+        filename = f"{number:03d}.json"
         (chapter_dir / filename).write_text(
             json.dumps(chapter, ensure_ascii=False, separators=(",", ":")), encoding="utf-8"
         )
