@@ -16,7 +16,8 @@
 | 地点 / LOCATIONS | `设定集/地点/` | `locations_01.md` | `#/places` |
 | 组织 / ORGANIZATIONS | `设定集/组织/` | `organizations_01.md` | `#/organizations` |
 | 纪年 / CHRONOLOGY | `设定集/联邦大事年纪.md` | 单文件，年份分块 | `#/chronology`、`#/chronology/2050` |
-| 关于我们 / ABOUT US | `设定集/关于我们/about_us.md` | 固定单文件 | `#/about` |
+| 杂项 / MISCELLANEOUS（08） | `设定集/杂项/` | `Miscellaneous_001.md` | `#/miscellaneous` |
+| 关于我们 / ABOUT US（09） | `设定集/关于我们/about_us.md` | 固定单文件 | `#/about` |
 | 首页封面 | 根目录 `封面.png` | 固定文件名 | `#/` |
 | 栏目名称、简介和顺序 | `site/sections.json` | 配置数组 | 侧栏、首页栏目入口 |
 
@@ -112,6 +113,34 @@ draft: false
 
 支持普通段落、二至四级标题、`**粗体**`、`*斜体*`、行内代码、三反引号围栏代码块、单层有序/无序列表、引用、简单 Markdown 表格及 `https://`、`http://`、`#/` 链接。每段以空行分隔；不支持嵌套列表、任务列表、脚注、复杂嵌套行内样式。表格单元格内不要使用竖线，所有行列数须与表头一致。原始 HTML 会转义为文本，正文 `![图片](...)` 不会接入图片。
 
+## 3A. 杂项接口（第八栏）
+
+组织（07）之后为杂项（08），关于我们移至 09。唯一来源为 `设定集/杂项/`，文件名精确匹配 `Miscellaneous_001.md`：首字母 M 大写，编号至少三位、正整数，允许跳号并按数值排序；001 与 0001 视为重复。`README.md` 和下划线开头的模板不发布。
+
+```markdown
+# 大标题
+
+## 自由编写的小标题一
+
+第一部分正文。
+
+## 自由编写的小标题二
+
+第二部分正文。
+
+## 自由编写的小标题三
+
+第三部分正文。
+```
+
+正式条目必须有一个一级大标题，紧接三个二级小标题，每部分均有非空正文。标题名称自由，不需要固定 tag；“正文”“档案字段”在本栏目也只是普通小标题，不触发特殊处理。不要增加额外标题层级。正文支持常规档案的文字、列表、表格和引用语法。
+
+无需元数据即可发布；如需摘要、状态或暂存草稿，可选用第 3 节的 summary、kicker、status、draft、id 字段。大标题仍须写在正文中。默认 id 将文件名转为小写，如 `Miscellaneous_001.md` → `#/miscellaneous/miscellaneous_001`。已有其他栏目仍保持原 id。杂项不生成档案字段侧栏，不提供图片或占位接口，`mediaEnabled: false`；不要添加 image 或 image_placeholder。
+
+复制 `设定集/杂项/_Miscellaneous_模板.md` 为正式编号文件即可开始。新增、修改、删除后，既有工作流自动更新 `dist/data/catalogue.json` 和列表/详情。部署成功后刷新或离开栏目再返回读取最新内容。格式或文件名错误会停止构建并显示文件路径。
+
+杂项配置额外使用 `minNumberDigits: 3`（文件编号最小位数）、`format: "three-sections"`（三个自由小标题的专用解析）。其他六类档案保留原规则，不能把杂项的标题规则套用到它们。
+
 ## 4. 纪年接口
 
 编辑 `设定集/联邦大事年纪.md`，保持以下格式：
@@ -158,7 +187,7 @@ draft: false
 
 ## 6. 图片接口与默认规则
 
-**用户没有明确要求配图时，所有新增条目默认纯文字，不添加图片或占位。** 人物、事件、地点、组织可以显式启用单张档案图；新闻、技术、纪年保持无图。
+**用户没有明确要求配图时，所有新增条目默认纯文字，不添加图片或占位。** 人物、事件、地点、组织可以显式启用单张档案图；新闻、技术、纪年、杂项保持无图。
 
 ### 档案图片
 
@@ -175,7 +204,7 @@ image_alt: "图中人物的姿态、环境与必要识别信息"
 - 图像同时用于列表卡片和详情，`image_alt` 用作替代文本及图注。只有一个图像位；多图、正文插图和独立人物剪影布局尚无专用接口，需要另行实现。
 - 已明确规划但暂未制作的图像，可仅写 `image_placeholder: true` 与 `image_alt`。同时提供 image 时显示真实图片。
 - 不写 image 且不启用 image_placeholder 就是纯文字，单独写 image_alt 不会创建图像位。
-- 新闻、技术在 `site/sections.json` 中配置 `mediaEnabled: false`；向这些栏目的条目添加有效 image 或 true 占位字段会停止构建。不能为了默认模板擅自重新开启。
+- 新闻、技术、杂项在 `site/sections.json` 中配置 `mediaEnabled: false`；向这些栏目的条目添加有效 image 或 true 占位字段会停止构建。不能为了默认模板擅自重新开启。
 - 老条目保留了已明确设置的占位。要改为纯文字，删除 image、image_placeholder 即可，可一并删除 image_alt。
 
 ### 封面与其他静态资产
@@ -191,7 +220,7 @@ image_alt: "图中人物的姿态、环境与必要识别信息"
 ```json
 {
   "id": "objects",
-  "number": "09",
+  "number": "10",
   "title": "事物",
   "en": "OBJECTS",
   "intro": "公共档案中的器物与其他对象。",
@@ -221,7 +250,7 @@ python -m http.server 8000
 | 构建模块 | 输入与输出 |
 |---|---|
 | `scripts/chapters.py` | 章节 Markdown → 排序后的章节对象 |
-| `scripts/catalogue.py` | 六类档案、关于我们 → `dist/data/catalogue.json` |
+| `scripts/catalogue.py` | 六类档案、杂项、关于我们 → `dist/data/catalogue.json` |
 | `scripts/build_site.py` | 统筹构建，生成 `dist/data/manifest.json`、`dist/data/chapters/001.json` 等，以及 `dist/data/chronology.json` |
 | `site/sections.json` | 生成 `dist/content.js` 中的栏目配置 |
 | `site/`、`封面.png` | 页面、样式、脚本、资产复制到 dist |
@@ -234,7 +263,7 @@ CI 会运行解析测试、纪年交互、档案/关于我们检查、章节目�
 
 网站地址：<https://tempaofc-lang.github.io/project-Melqu-ades-Ballad-/>
 
-Pages 发布来源应设为 **GitHub Actions**。推送之后须等待对应提交的 build、deploy 均成功，再刷新或离开当前栏目后重新进入。首页章数、章节目录、正文、六栏档案、关于我们和纪年均在进入时重新核对数据；不会在阅读中途自动替换正文。栏目配置或脚本改动后请整页刷新。
+Pages 发布来源应设为 **GitHub Actions**。推送之后须等待对应提交的 build、deploy 均成功，再刷新或离开当前栏目后重新进入。首页章数、章节目录、正文、六栏档案、杂项、关于我们和纪年均在进入时重新核对数据；不会在阅读中途自动替换正文。栏目配置或脚本改动后请整页刷新。
 
 更新未出现时依次检查：提交是否在 main；编辑的是不是上表中的唯一来源；文件名、目录、编号、草稿标记是否正确；对应 Actions 是否触发并部署成功；最后刷新页面。失败构建不会覆盖线上旧版本，先按日志中的文件路径修复错误，不要直接改生成文件。
 

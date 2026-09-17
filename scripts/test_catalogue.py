@@ -87,6 +87,30 @@ class CatalogueTests(unittest.TestCase):
             with self.subTest(text=text), self.assertRaises(ValueError):
                 entry_from_markdown(text, "personnel_01", self.section, self.root / "site")
 
+    def test_miscellaneous_free_headings_and_discovery(self):
+        self.section.update(id="miscellaneous", title="杂项", prefix="Miscellaneous", minNumberDigits=3, format="three-sections", mediaEnabled=False)
+        text = "# 记录标题\n\n## 正文\n\n一。\n\n## 档案字段\n\n二。\n\n## 任意名称\n\n三。"
+        self.write("Miscellaneous_010.md", text)
+        self.write("Miscellaneous_001.md", text)
+        entries = self.build()["entries"]["miscellaneous"]
+        self.assertEqual([e["id"] for e in entries], ["miscellaneous_001", "miscellaneous_010"])
+        self.assertEqual([b["text"] for b in entries[0]["blocks"] if b["type"] == "heading"], ["正文", "档案字段", "任意名称"])
+        self.assertEqual(entries[0]["facts"], [])
+        self.assertNotIn("media", entries[0])
+        self.write("Miscellaneous_001.md", text.replace("一。", "修订正文。"))
+        self.assertEqual(self.build()["entries"]["miscellaneous"][0]["summary"], "修订正文。")
+        (self.directory / "Miscellaneous_010.md").unlink()
+        self.assertEqual(len(self.build()["entries"]["miscellaneous"]), 1)
+        for bad in ("Miscellaneous_01.md", "miscellaneous_002.md"):
+            self.write(bad, text)
+            with self.assertRaises(ValueError):
+                self.build()
+            (self.directory / bad).unlink()
+        for bad in (text.replace("三。", ""), text.replace("## 任意名称\n\n三。", ""), "---\nimage_placeholder: true\n---\n" + text):
+            self.write("Miscellaneous_001.md", bad)
+            with self.assertRaises(ValueError):
+                self.build()
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -64,8 +64,20 @@
     "prefix": "organizations"
   },
   {
-    "id": "about",
+    "id": "miscellaneous",
     "number": "08",
+    "title": "杂项",
+    "en": "MISCELLANEOUS",
+    "intro": "查阅未归入其他栏目的公共记录、补充说明与日常资料。",
+    "sourceDir": "设定集/杂项",
+    "prefix": "Miscellaneous",
+    "minNumberDigits": 3,
+    "format": "three-sections",
+    "mediaEnabled": false
+  },
+  {
+    "id": "about",
+    "number": "09",
     "title": "关于我们",
     "en": "ABOUT US",
     "intro": "关于镜的收录范围、版本管理与公众查阅方式。"

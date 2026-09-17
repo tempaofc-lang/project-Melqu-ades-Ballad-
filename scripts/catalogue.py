@@ -128,7 +128,7 @@ def entry_from_markdown(text: str, stem: str, section: dict, site: Path) -> dict
     facts = []
     cleaned = []
     in_facts = False
-    for line in body.splitlines():
+    for line in ([] if section.get("format") == "three-sections" else body.splitlines()):
         if re.fullmatch(r"##\s+档案字段\s*", line):
             in_facts = True
             continue
@@ -144,8 +144,19 @@ def entry_from_markdown(text: str, stem: str, section: dict, site: Path) -> dict
                 facts.append(item[1])
         else:
             cleaned.append(line)
-    doc = document("\n".join(cleaned), meta.get("title", ""))
-    identifier = meta.get("id") or stem
+    if section.get("format") == "three-sections":
+        if not re.match(r"^#\s+\S", body.strip()):
+            raise ValueError("杂项请以 # 大标题 开始")
+        # Heading names are ordinary text, including 正文 and 档案字段.
+        doc = document(body)
+        headings = [i for i, block in enumerate(doc["blocks"]) if block["type"] == "heading"]
+        if len(headings) != 3 or any(doc["blocks"][i]["level"] != 2 for i in headings):
+            raise ValueError("杂项需要三个 ## 小标题，标题名称可自由填写")
+        if headings[0] != 0 or any(end == start + 1 for start, end in zip(headings, headings[1:] + [len(doc["blocks"])])):
+            raise ValueError("杂项每个小标题下须有非空正文，大标题后直接填写第一个小标题")
+    else:
+        doc = document("\n".join(cleaned), meta.get("title", ""))
+    identifier = meta.get("id") or stem.lower()
     if not re.fullmatch(r"[a-z0-9][a-z0-9_-]*", identifier):
         raise ValueError("id 仅允许小写英文字母、数字、下划线和连字符")
     first = next((block["text"] for block in doc["blocks"] if block["type"] == "paragraph"), "")
@@ -180,7 +191,8 @@ def catalogue_from_folders(root: Path, sections: list[dict]) -> dict:
             raise ValueError("sourceDir 必须位于设定集目录内")
         if not directory.is_dir():
             raise ValueError(f"找不到栏目文件夹：{section['sourceDir']}")
-        pattern = re.compile(re.escape(section["prefix"]) + r"_([0-9]+)\.md")
+        digits = int(section.get("minNumberDigits", 1))
+        pattern = re.compile(re.escape(section["prefix"]) + rf"_([0-9]{{{digits},}})\.md")
         files = []
         numbers = set()
         for path in directory.glob("*.md"):
