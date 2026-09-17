@@ -1,7 +1,7 @@
 """Build the public Mirror archive from the current manuscript.
 
 The site is intentionally dependency-free. Chapter text is copied from the
-author's Markdown export; public catalogue descriptions live in site/content.js.
+author's Markdown export; public catalogue descriptions are discovered in the setting folders.
 """
 
 from __future__ import annotations
@@ -10,6 +10,8 @@ import json
 import re
 import shutil
 from pathlib import Path
+
+from catalogue import catalogue_from_folders
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -83,6 +85,8 @@ def chronology_from_markdown(text: str) -> list[dict]:
 def build() -> None:
     chapters = chapters_from_manuscript(SOURCE.read_text(encoding="utf-8-sig"))
     chronology = chronology_from_markdown(CHRONOLOGY_SOURCE.read_text(encoding="utf-8-sig"))
+    sections = json.loads((SITE / "sections.json").read_text(encoding="utf-8"))
+    catalogue = catalogue_from_folders(ROOT, sections)
     if OUTPUT.exists():
         shutil.rmtree(OUTPUT)
     shutil.copytree(SITE, OUTPUT)
@@ -91,6 +95,9 @@ def build() -> None:
     shutil.copy2(ROOT / "封面.png", assets / "cover.png")
     chapter_dir = OUTPUT / "data" / "chapters"
     chapter_dir.mkdir(parents=True)
+
+    (OUTPUT / "content.js").write_text("window.MIRROR_CONTENT = " + json.dumps({"sections": sections}, ensure_ascii=False) + ";\n", encoding="utf-8")
+    (OUTPUT / "data" / "catalogue.json").write_text(json.dumps(catalogue, ensure_ascii=False, indent=2), encoding="utf-8")
 
     manifest = []
     for chapter in chapters:

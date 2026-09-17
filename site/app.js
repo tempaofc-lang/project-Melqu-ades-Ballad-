@@ -114,18 +114,18 @@
   function sectionPage(section) {
     if (section.id === "about") return aboutPage(section);
     const entries = catalogue.entries[section.id] || [];
-    return `${heading(`${section.number} / ${section.en}`, section.title, section.intro)}<div class="listing-tools"><span>已收录 ${entries.length} 条公开索引</span><label class="search"><span aria-hidden="true">⌕</span><span class="sr-only">搜索${esc(section.title)}</span><input id="record-filter" type="search" placeholder="筛选当前栏目" autocomplete="off"></label></div><div class="records-grid" id="records-grid">${entries.map(entry => card(section, entry)).join("")}</div><p id="empty-result" class="empty-result" hidden>当前栏目没有匹配的条目。</p>`;
+    return `${heading(`${section.number} / ${section.en}`, section.title, section.intro)}<div class="listing-tools"><span>已收录 ${entries.length} 条公开索引</span><label class="search"><span aria-hidden="true">⌕</span><span class="sr-only">搜索${esc(section.title)}</span><input id="record-filter" type="search" placeholder="筛选当前栏目" autocomplete="off"></label></div><div class="records-grid" id="records-grid">${entries.map(entry => card(section, entry)).join("")}</div><p id="empty-result" class="empty-result" ${entries.length ? "hidden" : ""}>${entries.length ? "当前栏目没有匹配的条目。" : "当前栏目尚无公开条目。"}</p>`;
   }
 
   function detailPage(section, entry) {
     const list = catalogue.entries[section.id] || [];
     const related = list.filter(item => item.id !== entry.id).slice(0, 3);
     const hasMedia = section.mediaEnabled !== false && Boolean(entry.media);
-    return `<div class="detail-page"><a href="#/${esc(section.id)}" class="text-link">← 返回${esc(section.title)}</a><div class="detail-heading"><div>${heading(`${section.number} / ${section.en} / RECORD`, entry.title, entry.summary)}<span class="detail-status"><span class="status-mark"></span>${esc(entry.status)}</span></div><span class="detail-index">${esc(section.number)} — ${String(list.indexOf(entry) + 1).padStart(2, "0")}</span></div><div class="detail-layout ${hasMedia ? "" : "text-only"}"><div class="detail-primary">${hasMedia ? media(entry.media, "large") : ""}<div class="detail-copy"><div class="eyebrow">PUBLIC SUMMARY / 公众说明</div>${entry.body.map(paragraph => `<p>${esc(paragraph)}</p>`).join("")}</div></div><aside class="detail-aside"><h2>档案字段</h2><dl>${entry.facts.map(fact => { const [name, ...value] = fact.split(" / "); return `<div><dt>${esc(name)}</dt><dd>${esc(value.join(" / "))}</dd></div>`; }).join("")}</dl><p class="aside-note">本页依据本地已接收资料编写。记录出现分歧时，以来源与状态字段为准。</p></aside></div><div class="related"><div class="section-mini-title"><span>同栏目继续查阅</span><a href="#/${esc(section.id)}">全部条目 ↗</a></div><div class="related-grid">${related.map(item => `<a href="#/${esc(section.id)}/${esc(item.id)}"><small>${esc(item.kicker)}</small><strong>${esc(item.title)}</strong><span aria-hidden="true">↗</span></a>`).join("")}</div></div></div>`;
+    return `<div class="detail-page"><a href="#/${esc(section.id)}" class="text-link">← 返回${esc(section.title)}</a><div class="detail-heading"><div>${heading(`${section.number} / ${section.en} / RECORD`, entry.title, entry.summary)}<span class="detail-status"><span class="status-mark"></span>${esc(entry.status)}</span></div><span class="detail-index">${esc(section.number)} — ${String(list.indexOf(entry) + 1).padStart(2, "0")}</span></div><div class="detail-layout ${hasMedia ? "" : "text-only"} ${entry.facts.length ? "" : "no-facts"}"><div class="detail-primary">${hasMedia ? media(entry.media, "large") : ""}<div class="detail-copy markdown-body"><div class="eyebrow">PUBLIC SUMMARY / 公众说明</div>${window.MIRROR_DOCUMENTS.render(entry.blocks)}</div></div>${entry.facts.length ? `<aside class="detail-aside"><h2>档案字段</h2><dl>${entry.facts.map(fact => { const [name, ...value] = fact.split(" / "); return `<div><dt>${esc(name)}</dt><dd>${esc(value.join(" / "))}</dd></div>`; }).join("")}</dl><p class="aside-note">本页依据本地已接收资料编写。记录出现分歧时，以来源与状态字段为准。</p></aside>` : ""}</div><div class="related"><div class="section-mini-title"><span>同栏目继续查阅</span><a href="#/${esc(section.id)}">全部条目 ↗</a></div><div class="related-grid">${related.map(item => `<a href="#/${esc(section.id)}/${esc(item.id)}"><small>${esc(item.kicker)}</small><strong>${esc(item.title)}</strong><span aria-hidden="true">↗</span></a>`).join("")}</div></div></div>`;
   }
 
   function aboutPage(section) {
-    return `${heading(`${section.number} / ${section.en}`, "关于镜", section.intro)}<div class="about-hero"><div class="about-symbol" aria-hidden="true"><i></i><i></i><i></i></div><div><span>GUANGHAN / LOCAL ARCHIVE</span><h2>让每一份记录<br>有可追溯的位置。</h2><p>${esc(catalogue.about.lead)}</p></div></div><div class="about-grid">${catalogue.about.blocks.map((block, index) => `<section><span>${String(index + 1).padStart(2, "0")}</span><h3>${esc(block.title)}</h3><p>${esc(block.text)}</p></section>`).join("")}</div><div class="note-banner about-note"><span>公共访问说明</span><p>本站为广寒宫本地节点的公开查阅界面。涉个人隐私、未授权机构资料与控制凭据不在此端提供。</p></div>`;
+    return `<article class="about-document">${heading(`${section.number} / ${section.en}`, catalogue.about.title, "广寒宫数据中心 · Mirror 项目") }<div class="markdown-body">${window.MIRROR_DOCUMENTS.render(catalogue.about.blocks)}</div></article>`;
   }
 
   function notFound() {
@@ -156,6 +156,14 @@
     if (token !== renderToken) return;
     try {
       let html;
+      if (section && (section.sourceDir || section.id === "about")) {
+        const response = await fetch("./data/catalogue.json", { cache: "no-cache" });
+        if (!response.ok) throw new Error("栏目资料暂时不可用");
+        const data = await response.json();
+        if (token !== renderToken) return;
+        catalogue.entries = data.entries;
+        catalogue.about = data.about;
+      }
       if (!parts.length) html = home();
       else if (isChronology) html = await window.MIRROR_CHRONOLOGY.page(parts[1]) || notFound();
       else if (parts[0] === "read" && !parts[1]) html = readerIndex();

@@ -301,3 +301,29 @@ main { width: min(100%, 1460px); margin: 0 auto; flex: 1; padding: 0 clamp(24px,
   *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
   .screen-wipe { display: none; }
 }
+
+/* Continuous public documents, including Markdown-sourced About and records. */
+.about-document { max-width: 850px; margin-inline: auto; }
+.about-document .page-heading h1 { font-size: clamp(28px, 4vw, 46px); }
+.markdown-body { min-width: 0; font-family: var(--serif); font-size: 16px; line-height: 2; overflow-wrap: anywhere; }
+.markdown-body > p { margin: 0 0 1.4em; }
+.markdown-body h2 { margin: 2.4em 0 1em; padding-top: 1.3em; border-top: 1px solid var(--line); font-family: var(--sans); font-size: 21px; line-height: 1.5; }
+.markdown-body h3, .markdown-body h4 { margin: 1.8em 0 .7em; font-family: var(--sans); line-height: 1.6; }
+.markdown-body ul, .markdown-body ol { padding-left: 1.5em; margin: 1em 0 1.5em; }
+.markdown-body li + li { margin-top: .5em; }
+.markdown-body a { text-decoration: underline; text-underline-offset: 3px; }
+.markdown-body blockquote { margin: 2em 0; padding: .4em 0 .4em 1.2em; border-left: 2px solid #a2a4a5; color: #626569; }
+.markdown-body blockquote p { margin: 0; }
+.markdown-body pre { overflow-x: auto; padding: 18px; background: #eceeef; font-size: 13px; }
+.document-table { max-width: 100%; overflow-x: auto; margin: 1.5em 0 2em; }
+.document-table table { width: 100%; border-collapse: collapse; font-family: var(--sans); font-size: 14px; line-height: 1.8; }
+.document-table th, .document-table td { padding: 14px 18px; border-bottom: 1px solid #d8dadd; text-align: left; vertical-align: top; }
+.document-table th { background: #eceeef; font-weight: 600; }
+.document-table td:first-child { white-space: nowrap; color: #616467; width: 28%; }
+.detail-layout.no-facts { grid-template-columns: minmax(0, 1fr); }
+.detail-layout.no-facts .detail-copy { max-width: 760px; }
+@media (max-width: 600px) {
+  .document-table table { min-width: 460px; }
+  .document-table th, .document-table td { padding: 12px; }
+  .markdown-body h2 { font-size: 19px; }
+}

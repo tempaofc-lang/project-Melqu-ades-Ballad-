@@ -6,7 +6,7 @@ on:
     paths:
       - 'site/**'
       - 'scripts/**'
-      - '设定集/联邦大事年纪.md'
+      - '设定集/**'
       - '梅尔基亚德斯的歌谣_主稿.md'
       - '封面.png'
       - '.github/workflows/pages.yml'
@@ -14,7 +14,7 @@ on:
     paths:
       - 'site/**'
       - 'scripts/**'
-      - '设定集/联邦大事年纪.md'
+      - '设定集/**'
       - '梅尔基亚德斯的歌谣_主稿.md'
       - '封面.png'
       - '.github/workflows/pages.yml'
@@ -39,7 +39,7 @@ jobs:
           python-version: '3.11'
       - name: Build archive
         run: python scripts/build_site.py
-      - name: Check chronology parser
+      - name: Check content parsers
         run: python -m unittest discover -s scripts -p 'test_*.py'
       - name: Prepare browser checks
         run: |
@@ -48,6 +48,8 @@ jobs:
           sudo apt-get install -y fonts-noto-cjk
       - name: Check chronology interactions
         run: python scripts/check_chronology_browser.py
+      - name: Check catalogue and About pages
+        run: python scripts/check_catalogue_browser.py
       - name: Save interface screenshots
         if: always()
         uses: actions/upload-artifact@v4

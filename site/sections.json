@@ -1,0 +1,73 @@
+[
+  {
+    "id": "people",
+    "number": "01",
+    "title": "人物",
+    "en": "PERSONNEL",
+    "intro": "从研究现场、公共服务窗口与档案机房认识这一时期的人。身份随记录时间变化，失联也保留为一种状态。",
+    "sourceDir": "设定集/人物",
+    "prefix": "personnel"
+  },
+  {
+    "id": "events",
+    "number": "02",
+    "title": "事件",
+    "en": "INCIDENTS",
+    "intro": "事件记录按接收来源编排。同一编号下的叙述可能不一致，查阅时请留意版本标记。",
+    "sourceDir": "设定集/事件",
+    "prefix": "events"
+  },
+  {
+    "id": "chronology",
+    "number": "03",
+    "title": "纪年",
+    "en": "CHRONOLOGY",
+    "intro": "按年份打开联邦大事档案，查阅公共生活、制度与技术发展的年度记录。",
+    "mediaEnabled": false
+  },
+  {
+    "id": "news",
+    "number": "04",
+    "title": "新闻",
+    "en": "NEWS",
+    "intro": "广寒宫公共端发布的服务消息与资料核查进展。发布顺序以本地接收为准；有新证据时，原消息仍保留供查阅。",
+    "mediaEnabled": false,
+    "sourceDir": "设定集/新闻",
+    "prefix": "news"
+  },
+  {
+    "id": "technology",
+    "number": "05",
+    "title": "技术",
+    "en": "TECHNOLOGY",
+    "intro": "设备的用途、操作边界与维护条件同样属于技术档案。以下条目不构成操作授权。",
+    "mediaEnabled": false,
+    "sourceDir": "设定集/技术",
+    "prefix": "technology"
+  },
+  {
+    "id": "places",
+    "number": "06",
+    "title": "地点",
+    "en": "LOCATIONS",
+    "intro": "从地表城市到月背设施：地点既是空间，也是记录从何处产生的线索。",
+    "sourceDir": "设定集/地点",
+    "prefix": "locations"
+  },
+  {
+    "id": "organizations",
+    "number": "07",
+    "title": "组织",
+    "en": "ORGANIZATIONS",
+    "intro": "机构名称反映其公开职责，不代表本地档案端认可其全部解释或决定。",
+    "sourceDir": "设定集/组织",
+    "prefix": "organizations"
+  },
+  {
+    "id": "about",
+    "number": "08",
+    "title": "关于我们",
+    "en": "ABOUT US",
+    "intro": "关于镜的收录范围、版本管理与公众查阅方式。"
+  }
+]
