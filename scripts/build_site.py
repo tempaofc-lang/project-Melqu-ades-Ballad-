@@ -13,6 +13,7 @@ from pathlib import Path
 
 from catalogue import catalogue_from_folders
 from chapters import chapters_from_folder
+from search_index import search_index
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -68,6 +69,10 @@ def build() -> None:
 
     (OUTPUT / "content.js").write_text("window.MIRROR_CONTENT = " + json.dumps({"sections": sections}, ensure_ascii=False) + ";\n", encoding="utf-8")
     (OUTPUT / "data" / "catalogue.json").write_text(json.dumps(catalogue, ensure_ascii=False, indent=2), encoding="utf-8")
+    (OUTPUT / "data" / "search.json").write_text(
+        json.dumps(search_index(chapters, catalogue, chronology, sections), ensure_ascii=False, separators=(",", ":")),
+        encoding="utf-8",
+    )
 
     manifest = []
     for chapter in chapters:

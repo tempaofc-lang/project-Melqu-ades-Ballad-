@@ -4,20 +4,24 @@
   const main = document.querySelector("#main");
   const nav = document.querySelector("#primary-nav");
   const crumb = document.querySelector("#crumb");
-  const wipe = document.querySelector("#screen-wipe");
+  const experience = window.MIRROR_EXPERIENCE;
   const menu = document.querySelector("#menu-button");
   const sidebar = document.querySelector("#sidebar");
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   let chapters = [];
   let renderToken = 0;
   let firstRender = true;
+  let renderedChapter = null;
+  const mobileLayout = matchMedia("(max-width: 760px)");
+  const backdrop = document.querySelector("#menu-backdrop");
+  const menuClose = document.querySelector("#sidebar-close");
 
   function esc(value) {
     return String(value ?? "").replace(/[&<>"']/g, character => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[character]);
   }
 
   function routeParts() {
-    const raw = location.hash.replace(/^#\/?/, "");
+    const raw = location.hash.split("?")[0].replace(/^#\/?/, "");
     return raw.split("/").filter(Boolean).map(part => decodeURIComponent(part));
   }
 
@@ -31,10 +35,15 @@
     return response.json();
   }
 
-  function closeMenu() {
+  function closeMenu(restore = false) {
     sidebar.classList.remove("is-open");
     menu.setAttribute("aria-expanded", "false");
     menu.setAttribute("aria-label", "打开栏目菜单");
+    sidebar.inert = mobileLayout.matches;
+    backdrop.hidden = true;
+    document.body.classList.remove("menu-open");
+    document.querySelector(".main-shell").inert = false;
+    if (restore) menu.focus();
   }
 
   function updateNav(active) {
@@ -85,8 +94,10 @@
     if (!response.ok) throw new Error("章节暂时无法读取");
     const chapter = await response.json();
     if (token !== renderToken) return null;
-    const fontSize = Number(localStorage.getItem("mirror-reader-size") || 0);
-    const paragraphs = chapter.paragraphs.map(item => item.kind === "scene" ? `<h2 class="scene-heading">${esc(item.text)}</h2>` : `<p>${esc(item.text)}</p>`).join("");
+    renderedChapter = chapter;
+    const storedSize = Number(experience.read("mirror-reader-size") || 0);
+    const fontSize = Number.isFinite(storedSize) ? storedSize : 0;
+    const paragraphs = chapter.paragraphs.map((item, i) => item.kind === "scene" ? `<h2 class="scene-heading" id="paragraph-${i}" data-paragraph="${i}" tabindex="-1">${esc(item.text)}</h2>` : `<p id="paragraph-${i}" data-paragraph="${i}" tabindex="-1">${esc(item.text)}</p>`).join("");
     return `<article class="reader-page"><div class="reader-bar"><a href="#/read" class="text-link">← 全部章节</a><span>镜 / 文献阅读</span><div class="reader-tools"><button type="button" data-reader-size="-1" aria-label="缩小正文字号">A−</button><button type="button" data-reader-size="1" aria-label="放大正文字号">A＋</button></div></div><div class="reading-progress"><span id="reading-progress"></span></div><header class="reader-header"><div class="eyebrow"><span class="eyebrow-line"></span>ARCHIVED TEXT / ${String(number).padStart(3, "0")}</div><h1>${esc(record.label)}</h1><p>梅尔基亚德斯的歌谣 · 当前接收版本</p></header><div class="reader-copy" style="--reader-step:${Math.max(-2, Math.min(3, fontSize))}">${paragraphs}</div><nav class="reader-end" aria-label="章节导航">${previous ? `<a href="#/read/${previous.number}"><small>上一章</small><span>${esc(previous.label)} ←</span></a>` : `<span></span>`}${next ? `<a href="#/read/${next.number}"><small>下一章</small><span>${esc(next.label)} →</span></a>` : `<a href="#/read"><small>返回</small><span>章节目录 →</span></a>`}</nav></article>`;
   }
 
@@ -127,7 +138,10 @@
   }
 
   async function render() {
+    experience.leaveChapter();
+    renderedChapter = null;
     const token = ++renderToken;
+    const query = new URLSearchParams(location.hash.split("?")[1] || "");
     const parts = routeParts();
     const section = sectionById(parts[0]);
     const active = parts[0] === "read" ? "read" : section?.id || "home";
@@ -136,10 +150,7 @@
     const isChronology = section?.id === "chronology" && parts.length <= 2;
     if (isChronology && window.MIRROR_CHRONOLOGY.isMounted() && window.MIRROR_CHRONOLOGY.navigate(parts[1])) return;
     window.MIRROR_CHRONOLOGY.destroy();
-    if (!firstRender && !reducedMotion.matches) {
-      wipe.classList.add("enter");
-      await new Promise(resolve => setTimeout(resolve, 190));
-    }
+    main.setAttribute("aria-busy", "true");
     if (token !== renderToken) return;
     try {
       let html;
@@ -169,8 +180,29 @@
       } else html = notFound();
       if (token !== renderToken || html === null) return;
       main.innerHTML = html;
+      if (!parts.length) {
+        const entry = document.createElement("div");
+        entry.className = "home-entry";
+        entry.innerHTML = experience.resumeLink(chapters) || `<a class="primary-action compact" href="#/read/${chapters[0].number}">从首章开始 <span aria-hidden="true">↗</span></a>`;
+        main.querySelector(".home-intro-line").after(entry);
+      } else if (parts[0] === "read" && !parts[1]) {
+        main.querySelector(".chapter-jump").insertAdjacentHTML("beforebegin", experience.resumeLink(chapters));
+      }
+      if (renderedChapter) {
+        const notice = document.createElement("p");
+        notice.id = "reader-notice";
+        notice.className = "reader-notice";
+        notice.hidden = true;
+        main.querySelector(".reader-header").after(notice);
+      }
+      const copyHost = main.querySelector(".reader-tools, .detail-heading");
+      if (copyHost) copyHost.insertAdjacentHTML("beforeend", '<button type="button" class="quiet-button copy-link" data-copy-link>复制链接</button>');
       if (isChronology) window.MIRROR_CHRONOLOGY.mount(parts[1]);
       window.scrollTo({ top: 0, behavior: "instant" });
+      if (!firstRender && !document.querySelector("dialog[open]")) main.focus({preventScroll: true});
+      document.querySelector("#page-status").textContent = document.title;
+      if (!firstRender && !reducedMotion.matches) main.animate([{opacity: .5}, {opacity: 1}], {duration: 160, easing: "ease-out"});
+      if (renderedChapter) await experience.mountChapter(renderedChapter, query);
       updateProgress();
     } catch (error) {
       if (token === renderToken) main.innerHTML = `${heading("SYSTEM / UNAVAILABLE", "资料暂时无法读取", "请稍后重试，或返回其他栏目。")}<a class="text-link" href="#/">返回总览 →</a>`;
@@ -178,7 +210,7 @@
     } finally {
       if (token === renderToken) {
         firstRender = false;
-        wipe.classList.remove("enter");
+        main.removeAttribute("aria-busy");
       }
     }
   }
@@ -191,10 +223,26 @@
   }
 
   menu.addEventListener("click", () => {
-    const open = sidebar.classList.toggle("is-open");
-    menu.setAttribute("aria-expanded", String(open));
-    menu.setAttribute("aria-label", open ? "关闭栏目菜单" : "打开栏目菜单");
+    sidebar.classList.add("is-open");
+    sidebar.inert = false;
+    backdrop.hidden = false;
+    document.body.classList.add("menu-open");
+    menu.setAttribute("aria-expanded", "true");
+    menu.setAttribute("aria-label", "关闭栏目菜单");
+    document.querySelector(".main-shell").inert = true;
+    menuClose.focus();
   });
+  menuClose.addEventListener("click", () => closeMenu(true));
+  backdrop.addEventListener("click", () => closeMenu(true));
+  sidebar.addEventListener("keydown", event => {
+    if (event.key !== "Tab" || !mobileLayout.matches) return;
+    const links = [...sidebar.querySelectorAll("a, button")];
+    if (event.shiftKey && document.activeElement === links[0]) { event.preventDefault(); links.at(-1).focus(); }
+    else if (!event.shiftKey && document.activeElement === links.at(-1)) { event.preventDefault(); links[0].focus(); }
+  });
+  sidebar.addEventListener("click", event => { if (event.target.closest("a")) closeMenu(true); });
+  mobileLayout.addEventListener("change", () => closeMenu());
+  closeMenu();
   main.addEventListener("input", event => {
     if (event.target.id !== "record-filter") return;
     const query = event.target.value.trim().toLocaleLowerCase();
@@ -205,17 +253,30 @@
       if (match) visible++;
     });
     document.querySelector("#empty-result").hidden = visible !== 0;
+    document.querySelector(".listing-tools > span").textContent = query ? `找到 ${visible} 条公开索引` : `已收录 ${visible} 条公开索引`;
   });
-  main.addEventListener("click", event => {
+  main.addEventListener("click", async event => {
+    const copyButton = event.target.closest("[data-copy-link]");
+    if (copyButton) {
+      try {
+        await navigator.clipboard.writeText(location.href.replace(/\?resume=1$/, ""));
+        copyButton.textContent = "已复制";
+        document.querySelector("#page-status").textContent = "链接已复制。";
+        setTimeout(() => { copyButton.textContent = "复制链接"; }, 1800);
+      } catch { document.querySelector("#page-status").textContent = "无法自动复制，请从地址栏复制链接。"; }
+      return;
+    }
     const button = event.target.closest("[data-reader-size]");
     if (!button) return;
     const copy = document.querySelector(".reader-copy");
-    const next = Math.max(-2, Math.min(3, Number(localStorage.getItem("mirror-reader-size") || 0) + Number(button.dataset.readerSize)));
-    localStorage.setItem("mirror-reader-size", String(next));
+    const value = Number(experience.read("mirror-reader-size") || 0);
+    const next = Math.max(-2, Math.min(3, (Number.isFinite(value) ? value : 0) + Number(button.dataset.readerSize)));
+    experience.write("mirror-reader-size", next);
     copy.style.setProperty("--reader-step", next);
+    document.querySelector("#page-status").textContent = `阅读字号已调整${next === 3 ? "至最大" : next === -2 ? "至最小" : ""}`;
   });
   window.addEventListener("hashchange", render);
   window.addEventListener("scroll", updateProgress, { passive: true });
-  window.addEventListener("keydown", event => { if (event.key === "Escape") closeMenu(); });
+  window.addEventListener("keydown", event => { if (event.key === "Escape" && sidebar.classList.contains("is-open")) closeMenu(true); });
   render();
 })();

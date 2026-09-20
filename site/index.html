@@ -9,15 +9,18 @@
   <link rel="icon" href="./favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./styles.css">
   <link rel="stylesheet" href="./chronology.css">
+  <link rel="stylesheet" href="./experience.css">
   <script defer src="./content.js"></script>
   <script defer src="./chronology.js"></script>
   <script defer src="./documents.js"></script>
+  <script defer src="./experience.js"></script>
   <script defer src="./app.js"></script>
 </head>
 <body>
   <a class="skip-link" href="#main">跳至正文</a>
   <div class="site-shell">
     <aside class="sidebar" id="sidebar" aria-label="档案栏目">
+      <button class="sidebar-close" id="sidebar-close" type="button">关闭菜单 ×</button>
       <a class="brand" href="#/" aria-label="镜，返回首页">
         <span class="brand-mark" aria-hidden="true"><span></span></span>
         <span><strong>镜</strong><small>MIRROR / ARCHIVE</small></span>
@@ -35,12 +38,24 @@
       <header class="topbar">
         <button class="menu-button" id="menu-button" type="button" aria-label="打开栏目菜单" aria-expanded="false" aria-controls="sidebar"><span></span><span></span></button>
         <div class="crumb" id="crumb">镜 / 公共档案</div>
-        <div class="topbar-right"><span class="topbar-edition">本地接收版本</span><span class="topbar-dot"></span><span>2087</span></div>
+        <div class="topbar-right"><button class="archive-search-button" id="open-search" type="button" aria-haspopup="dialog"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10" cy="10" r="6.5"/><path d="m15 15 6 6"/></svg><span>检索档案</span><kbd>Ctrl K</kbd></button><span class="topbar-edition">2087</span></div>
       </header>
-      <main id="main" tabindex="-1" aria-live="polite"></main>
+      <main id="main" tabindex="-1"></main>
       <footer class="footer"><span>镜 · 广寒宫公共档案访问端</span><span>当记录存在差异，保留各自来源与接收时间。</span></footer>
     </div>
   </div>
-  <div class="screen-wipe" id="screen-wipe" aria-hidden="true"></div>
+  <button id="menu-backdrop" class="menu-backdrop" hidden aria-label="关闭栏目菜单" tabindex="-1"></button>
+  <p id="page-status" class="sr-only" role="status"></p>
+  <dialog class="archive-search" id="archive-search" aria-labelledby="search-title">
+    <header class="search-dialog-header"><div><span class="search-series">MIRROR / PUBLIC INDEX</span><h2 id="search-title">全站检索</h2></div><button type="button" id="close-search" class="quiet-button" aria-label="关闭检索">关闭 ×</button></header>
+    <label class="global-search-field"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10" cy="10" r="6.5"/><path d="m15 15 6 6"/></svg><input id="global-query" type="search" maxlength="120" placeholder="输入人物、地点、事件或正文关键词" aria-label="全站检索关键词" autocomplete="off" autofocus></label>
+    <div class="search-meta"><p id="search-status" role="status">输入关键词，查阅全站记录。</p><button id="retry-search" type="button" class="quiet-button" hidden>重试</button></div>
+    <div class="search-results" id="search-results" aria-label="检索结果"></div>
+    <footer class="search-dialog-footer"><span>标题优先 · 正文可检索</span><span>↑ ↓ 选择 · Enter 打开 · Esc 关闭</span></footer>
+  </dialog>
+  <dialog id="archive-intro" class="archive-intro" aria-label="镜，广寒宫本地节点">
+    <div class="intro-identity"><svg class="intro-symbol" viewBox="0 0 120 120" aria-hidden="true"><path class="intro-lines" d="M60 5v110M5 60h110"/><circle class="intro-ring" cx="60" cy="60" r="39"/><circle class="intro-point" cx="60" cy="60" r="4"/></svg><strong>镜</strong><p>广寒宫本地节点</p><small>GUANGHAN / MIRROR ARCHIVE</small></div>
+    <button type="button" class="quiet-button intro-skip" id="skip-intro" autofocus>进入档案</button>
+  </dialog>
 </body>
 </html>
