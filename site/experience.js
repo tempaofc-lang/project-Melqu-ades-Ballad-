@@ -133,7 +133,12 @@
       return r.json();
     }).then(data => { if (!Array.isArray(data.records)) throw new Error("index"); records = data.records; }).finally(() => { request = null; });
     try { await request; search(); }
-    catch { status.textContent = "索引暂时无法读取，请重试。"; retry.hidden = false; }
+    catch {
+      status.textContent = location.protocol === "file:"
+        ? "本地文件模式无法读取检索索引。请通过本地 HTTP 预览服务或线上站点访问。"
+        : "索引暂时无法读取，请重试。";
+      retry.hidden = false;
+    }
   }
   function openSearch() {
     if (document.querySelector("#chronicle-dialog[open], #archive-intro[open]")) return;

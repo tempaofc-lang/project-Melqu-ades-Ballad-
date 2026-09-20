@@ -19,7 +19,7 @@ def search_index(chapters, catalogue, chronology, sections):
         for entry in entries:
             records.append({"title": entry["title"], "category": labels[section],
                             "url": f"#/{section}/{entry['id']}",
-                            "paragraphs": [entry["summary"], *entry["facts"], *[block_text(b) for b in entry["blocks"]]]})
+                            "paragraphs": [entry["summary"], *entry.get("subtitles", []), *entry["facts"], *[block_text(b) for b in entry["blocks"]]]})
     for record in chronology:
         records.append({"title": f"{record['year']} · {record['summary']}", "category": "纪年",
                         "url": f"#/chronology/{record['year']}", "paragraphs": record["paragraphs"]})
