@@ -28,6 +28,7 @@ try:
         page.on("request", lambda r: requests.append(r.url))
         page.goto(url)
         expect(page.locator(".home-entry")).to_be_visible()
+        expect(page.locator("#archive-intro")).to_be_hidden()
         assert not any("search.json" in r for r in requests), "Search must load on demand"
         page.locator("#open-search").click()
         expect(page.locator("#global-query")).to_be_focused()
@@ -110,7 +111,34 @@ try:
         fresh = browser.new_page()
         fresh.goto(url, wait_until="domcontentloaded")
         expect(fresh.locator("#archive-intro")).to_be_visible()
-        fresh.wait_for_timeout(400)  # Sample the authored entrance, not a loading wait.
+        # Sample the animation timeline deterministically: later stages must stay hidden.
+        def intro_state(time):
+            return fresh.evaluate("""time => {
+              const root = document.querySelector('#archive-intro');
+              root.getAnimations({subtree:true}).forEach(a => {a.pause(); a.currentTime = time;});
+              const style = selector => getComputedStyle(root.querySelector(selector));
+              return {
+                vertical: parseFloat(style('.intro-vertical').strokeDashoffset),
+                horizontal: parseFloat(style('.intro-horizontal').strokeDashoffset),
+                ring: parseFloat(style('.intro-ring').strokeDashoffset),
+                point: Number(style('.intro-point').opacity),
+                letters: [...root.querySelectorAll('.intro-character')].filter(el => Number(getComputedStyle(el).opacity) === 1).length
+              };
+            }""", time)
+        state = intro_state(300)
+        assert 0 < state['vertical'] < 110 and state['horizontal'] == 110
+        assert state['ring'] == 246 and state['point'] == 0 and state['letters'] == 0
+        state = intro_state(850)
+        assert state['vertical'] == 0 and 0 < state['horizontal'] < 110 and state['ring'] == 246
+        state = intro_state(1500)
+        assert state['horizontal'] == 0 and 0 < state['ring'] < 246 and state['point'] == 0
+        state = intro_state(2100)
+        assert state['ring'] == 0 and 0 < state['point'] < 1 and state['letters'] == 0
+        assert intro_state(2400)['letters'] == 1
+        assert intro_state(2855)['letters'] == 4
+        assert intro_state(3650)['letters'] == 11
+        state = intro_state(4600)
+        assert state['letters'] == fresh.locator('.intro-character').count(), fresh.locator('.intro-character').evaluate_all("els => els.map(e => [e.textContent, e.style.getPropertyValue('--character-delay'), getComputedStyle(e).opacity])")
         fresh.screenshot(path=str(ROOT / "preview-experience-intro.png"))
         fresh.locator("#skip-intro").click()
         expect(fresh.locator("#archive-intro")).to_be_hidden()
@@ -119,6 +147,24 @@ try:
         direct = browser.new_page()
         direct.goto(url + "#/read/1")
         expect(direct.locator("#archive-intro")).to_be_hidden()
+        complete = browser.new_page(viewport={"width": 390, "height": 844})
+        complete.on("pageerror", lambda e: errors.append(str(e)))
+        complete.goto(url)
+        expect(complete.locator("#archive-intro")).to_be_visible()
+        expect(complete.locator("#archive-intro")).to_be_hidden(timeout=7000)
+        expect(complete.locator("#main")).to_be_focused()
+        complete.evaluate("sessionStorage.removeItem('mirror-intro-seen')")
+        complete.reload()
+        expect(complete.locator("#archive-intro")).to_be_visible()
+        complete.keyboard.press("Escape")
+        expect(complete.locator("#archive-intro")).to_be_hidden()
+        # Expanded public copy must remain readable on small and large screens.
+        for width in [390, 1440]:
+            complete.set_viewport_size({"width": width, "height": 900})
+            complete.goto(url + "#/people/chen-boyuan")
+            expect(complete.locator(".detail-copy")).to_contain_text("事件前接收的内容")
+            assert complete.evaluate("document.documentElement.scrollWidth <= innerWidth")
+            complete.screenshot(path=str(ROOT / f"preview-experience-copy-{width}.png"), full_page=True)
         assert not errors, errors
         browser.close()
 finally:

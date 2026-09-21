@@ -198,11 +198,28 @@
   try {
     if ((!location.hash || location.hash === "#/" || location.hash === "#") && !motion.matches && !sessionStorage.getItem("mirror-intro-seen")) {
       sessionStorage.setItem("mirror-intro-seen", "1");
+      // Reserve the full text width; only visibility changes as each letter prints.
+      let characterTime = 2350;
+      intro.querySelectorAll(".intro-identity strong, .intro-identity p, .intro-identity small").forEach(line => {
+        const label = line.textContent;
+        line.setAttribute("aria-label", label);
+        line.replaceChildren(...Array.from(label, character => {
+          const span = document.createElement("span");
+          span.className = "intro-character";
+          span.setAttribute("aria-hidden", "true");
+          span.textContent = character;
+          span.style.setProperty("--character-delay", `${characterTime}ms`);
+          characterTime += line.tagName === "SMALL" ? 42 : 100;
+          return span;
+        }));
+        characterTime += 200;
+      });
       intro.showModal();
-      introTimer = setTimeout(() => closeIntro(true), 760);
+      introTimer = setTimeout(() => closeIntro(true), characterTime + 500);
     }
   } catch { /* An unavailable session store simply omits the entrance. */ }
   document.querySelector("#skip-intro").addEventListener("click", closeIntro);
+  intro.addEventListener("cancel", event => { event.preventDefault(); closeIntro(); });
   motion.addEventListener("change", event => { if (event.matches) closeIntro(); });
   addEventListener("hashchange", closeIntro);
   window.MIRROR_EXPERIENCE = {read, write, resumeLink, leaveChapter, mountChapter};

@@ -55,13 +55,14 @@ body:has(.archive-search[open]) { overflow: hidden; }
 .archive-intro::backdrop { background: #f8f8f8; }
 .intro-identity { text-align: center; }
 .intro-symbol { width: 110px; height: 110px; display: block; margin: 0 auto 24px; fill: none; stroke: #454545; stroke-width: .8; }
-.intro-lines { stroke-dasharray: 110; animation: draw-line 500ms var(--motion-ease) both; }
-.intro-ring { stroke-dasharray: 246; animation: draw-ring 600ms 80ms var(--motion-ease) both; }
-.intro-point { fill: #242424; animation: identity-in 300ms 180ms both; }
+.intro-lines { stroke-dasharray: 110; animation: draw-line 550ms var(--motion-ease) both; }
+.intro-horizontal { animation-delay: 550ms; }
+.intro-ring { stroke-dasharray: 246; animation: draw-ring 850ms 1100ms var(--motion-ease) both; }
+.intro-point { fill: #242424; animation: identity-in 250ms 1950ms both; }
 .intro-identity strong { display: block; font: 42px var(--serif); }
 .intro-identity p { font: 13px var(--sans); margin: 18px 0 9px; }
 .intro-identity small { font: 10px var(--mono); letter-spacing: .12em; color: #595959; }
-.intro-identity strong, .intro-identity p, .intro-identity small { animation: identity-in 300ms 200ms both; }
+.intro-character { animation: identity-in 1ms var(--character-delay) step-end both; white-space: pre; }
 .intro-skip { position: absolute; bottom: 36px; right: 36px; }
 .card-foot span:last-child, .section-card b, .nav-arrow { transition: transform var(--motion-fast) var(--motion-ease); }
 .record-card:hover .card-foot span:last-child, .section-card:hover b { transform: translate(2px, -2px); }
