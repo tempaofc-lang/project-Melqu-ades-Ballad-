@@ -14,7 +14,7 @@ def metadata(text: str) -> tuple[dict, str]:
     if end is None:
         raise ValueError("顶部元数据缺少结束的 ---")
     values = {}
-    allowed = {"title", "id", "summary", "kicker", "status", "draft", "image", "image_alt", "image_placeholder"}
+    allowed = {"title", "id", "summary", "kicker", "status", "draft", "image", "image_alt", "image_placeholder", "image_secondary", "image_secondary_alt"}
     for line in lines[1:end]:
         if not line.strip() or line.lstrip().startswith("#"):
             continue
@@ -168,20 +168,21 @@ def entry_from_markdown(text: str, stem: str, section: dict, site: Path) -> dict
              "facts": facts, "blocks": doc["blocks"]}
     if "subtitles" in doc:
         entry["subtitles"] = doc["subtitles"]
-    image = meta.get("image")
-    placeholder = meta.get("image_placeholder", False)
-    if image or placeholder:
-        if section.get("mediaEnabled") is False:
-            raise ValueError(f"{section['title']}栏目已关闭配图，请移除 image 和 image_placeholder")
-        media = {"alt": meta.get("image_alt") or doc["title"]}
-        if image:
-            path = Path(image)
-            if not image.startswith("assets/") or ".." in path.parts or re.search(r"[?#<>\"'\\%]", image):
-                raise ValueError("image 必须是 assets/ 下的安全相对路径")
-            if path.suffix.lower() not in {".png", ".jpg", ".jpeg", ".webp", ".gif", ".svg", ".avif"} or not (site / path).is_file():
-                raise ValueError(f"配图文件不存在或格式不支持：{image}")
-            media["src"] = image
-        entry["media"] = media
+    for key, alt_key, output_key in [("image", "image_alt", "media"), ("image_secondary", "image_secondary_alt", "media_secondary")]:
+        image = meta.get(key)
+        placeholder = meta.get("image_placeholder", False) if key == "image" else False
+        if image or placeholder:
+            if section.get("mediaEnabled") is False:
+                raise ValueError(f"{section['title']}栏目已关闭配图，请移除 image 和 image_placeholder")
+            media = {"alt": meta.get(alt_key) or doc["title"]}
+            if image:
+                path = Path(image)
+                if not image.startswith("assets/") or ".." in path.parts or re.search(r"[?#<>\"'\\%]", image):
+                    raise ValueError("image 必须是 assets/ 下的安全相对路径")
+                if path.suffix.lower() not in {".png", ".jpg", ".jpeg", ".webp", ".gif", ".svg", ".avif"} or not (site / path).is_file():
+                    raise ValueError(f"配图文件不存在或格式不支持：{image}")
+                media["src"] = image
+            entry[output_key] = media
     return entry
 
 

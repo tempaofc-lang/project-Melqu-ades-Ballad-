@@ -3,8 +3,8 @@ id: "jerusalem"
 summary: "宗教、居住与公共历史高度交织的城市，也是跨版本资料分歧最集中的核查地点。"
 kicker: "地球 · 多来源事件地点"
 status: "资料分歧"
-image_placeholder: true
-image_alt: "地点图像位置：耶路撒冷城市方位图"
+image: "assets/locations/LO-08-jerusalem-v1.png"
+image_alt: "耶路撒冷：城市空间概念示意，非实测地图 · 概念复原"
 ---
 
 # 耶路撒冷

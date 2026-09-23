@@ -3,8 +3,8 @@ id: "tycho"
 summary: "具有公共服务、大学、住宅与工程部门的月球城市，扩建能力仍以实际验收为准。"
 kicker: "月球正面 · 定居城市"
 status: "运行中"
-image_placeholder: true
-image_alt: "地点图像位置：第谷基地公共中庭"
+image: "assets/locations/LO-07-tycho-atrium-v1.png"
+image_alt: "第谷基地公共中庭：多层公共服务与居住通道 · 概念复原"
 ---
 
 # 第谷基地

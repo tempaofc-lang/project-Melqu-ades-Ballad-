@@ -340,3 +340,10 @@ main { width: min(100%, 1460px); margin: 0 auto; flex: 1; padding: 0 clamp(24px,
 .misc-subtitles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; padding-block: 18px; border-block: 1px solid var(--line); font-size: 14px; line-height: 1.8; }
 .misc-subtitles span { min-width: 0; overflow-wrap: anywhere; }
 @media (max-width: 600px) { .misc-subtitles { gap: 10px; font-size: 13px; } }
+
+/* Keep engineering drawings and their marginal annotations uncropped. */
+figure.media-frame.large { height: auto; min-height: 0; background: #f4f4f4; }
+figure.media-frame.large img { height: auto; object-fit: contain; }
+figure.media-frame.large figcaption { position: static; line-height: 1.6; }
+figure.media-frame.large + figure.media-frame.large { margin-top: 24px; }
+figure.media-frame.small img { object-fit: contain; }

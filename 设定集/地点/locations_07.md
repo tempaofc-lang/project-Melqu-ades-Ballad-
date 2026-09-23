@@ -3,8 +3,8 @@ id: "taklamakan"
 summary: "沙漠中的旧式射电阵列，远离常用通讯网络，设备维护条件与现代城市设施不同。"
 kicker: "地球 · 封存设施"
 status: "后续待核"
-image_placeholder: true
-image_alt: "地点图像位置：沙漠中的天线罩"
+image: "assets/locations/LO-05-chang-geng-7-v1.png"
+image_alt: "长庚-7：天线罩与地下控制设施 · 概念复原"
 ---
 
 # 塔克拉玛干 · 长庚-7

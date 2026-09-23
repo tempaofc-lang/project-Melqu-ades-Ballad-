@@ -3,8 +3,8 @@ id: "new-shanghai"
 summary: "第谷的一处居住区，环境工程部、公共中庭与社区厨房共同构成日常生活。"
 kicker: "第谷基地 · 居住与工程"
 status: "运行中"
-image_placeholder: true
-image_alt: "地点图像位置：新上海区街道与穹顶"
+image: "assets/locations/LO-03-new-shanghai-v1.png"
+image_alt: "新上海区：人工昼光下的社区生活与环境维护 · 概念复原"
 ---
 
 # 新上海区

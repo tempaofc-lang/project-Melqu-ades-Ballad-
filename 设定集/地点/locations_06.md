@@ -3,8 +3,8 @@ id: "nanjing"
 summary: "多处公共空间仍在使用，部分馆藏与纪念场所的名称和叙述出现版本差异。"
 kicker: "地球 · 公共记忆地点"
 status: "资料分歧"
-image_placeholder: true
-image_alt: "地点图像位置：城市公共档案与街道"
+image: "assets/locations/LO-06-nanjing-museum-v1.png"
+image_alt: "南京东方和平博物馆：公共展陈空间 · 概念复原"
 ---
 
 # 南京

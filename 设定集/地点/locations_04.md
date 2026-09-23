@@ -3,8 +3,8 @@ id: "prometheus"
 summary: "为长期分析记忆异常而建立的海底设施，具备计算、观测与现场调度能力。"
 kicker: "太平洋 · 深海观测设施"
 status: "联系中断"
-image_placeholder: true
-image_alt: "地点图像位置：深海基地结构图"
+image: "assets/locations/LO-04-prometheus-v1.png"
+image_alt: "普罗米修斯基地：深海观测设施剖面 · 概念复原"
 ---
 
 # 普罗米修斯基地

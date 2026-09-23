@@ -3,8 +3,10 @@ id: "guanghan"
 summary: "月背科研与工业基地，镜的核心存储设施及独立通讯岗位设于此处。"
 kicker: "月球背面 · 科研基地"
 status: "运行中"
-image_placeholder: true
-image_alt: "地点图像位置：广寒宫基地剖面与月背地表"
+image: "assets/locations/LO-01-guanghan-comms-v1.png"
+image_secondary: "assets/locations/LO-02-mirror-core-v2.png"
+image_secondary_alt: "镜核心机房：多层存储计算阵列与独立维护设施 · 概念复原"
+image_alt: "广寒宫通讯控制室：三组监听屏与值班岗位 · 概念复原"
 ---
 
 # 广寒宫
